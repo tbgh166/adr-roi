@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrast ADR ROI Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 960px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6">
+    <div class="container mx-auto bg-white shadow-xl rounded-2xl p-6 sm:p-10 my-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 leading-tight">Contrast ADR ROI Calculator</h1>
+            <p class="mt-2 text-lg text-gray-600">Quantify the financial benefits for your SOC team.</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <!-- Inputs Section -->
+            <section class="bg-gray-50 p-6 rounded-xl shadow-inner">
+                <h2 class="text-2xl font-bold text-gray-700 mb-6">Your Current Situation</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="incidents" class="block text-sm font-medium text-gray-700"># of ANNUAL verified security incidents</label>
+                        <input id="incidents" type="number" value="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                    <div>
+                        <label for="hourlyRate" class="block text-sm font-medium text-gray-700">SOC analyst hourly rate ($)</label>
+                        <input id="hourlyRate" type="number" value="60" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                    <div>
+                        <label for="beforeTime" class="block text-sm font-medium text-gray-700">Time to verify each incident without Contrast (minutes)</label>
+                        <input id="beforeTime" type="number" value="180" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                    <div>
+                        <label for="afterTime" class="block text-sm font-medium text-gray-700">Time to verify each incident with Contrast (minutes)</label>
+                        <input id="afterTime" type="number" value="0.5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                    <!-- New input for Contrast cost -->
+                    <div>
+                        <label for="contrastCost" class="block text-sm font-medium text-gray-700">Contrast ADR Annual Cost ($)</label>
+                        <input id="contrastCost" type="number" value="40000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="bg-indigo-50 p-6 rounded-xl shadow-inner flex flex-col justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-indigo-700 mb-6">Projected Savings & ROI</h2>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">Annual Cost Without Contrast</h3>
+                            <p id="beforeCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">Annual Cost With Contrast</h3>
+                            <p id="afterCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
+                        </div>
+                        <!-- Daily Cost and Savings -->
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">DAILY cost to verify all application security incidents are exploits</h3>
+                            <p id="dailyCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">DAILY cost saved</h3>
+                            <p id="dailySavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">MONTHLY cost saved</h3>
+                            <p id="monthlySavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">Total Annual Savings</h3>
+                            <p id="annualSavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold text-gray-800">Net Annual Benefit</h3>
+                            <p id="netBenefit" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
+                            <p class="text-xs text-gray-500">Savings minus Contrast's annual cost</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 space-y-4">
+                        <div class="bg-indigo-600 text-white p-4 rounded-lg shadow-md">
+                            <h3 class="text-lg font-bold">Return on Investment (ROI)</h3>
+                            <p id="roi" class="text-4xl font-extrabold mt-1">0%</p>
+                        </div>
+                        <div class="bg-indigo-500 text-white p-4 rounded-lg shadow-md">
+                            <h3 class="text-lg font-bold">Payback Period</h3>
+                            <p id="paybackPeriod" class="text-4xl font-extrabold mt-1">0 years</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 text-sm text-gray-600">
+                    <p class="font-semibold">Assumptions:</p>
+                    <p class="text-xs text-gray-500 mt-2">
+                        SOC team gets alerts using their current tools.<br>
+                        SOC team must go through each alert and for application vulnerabilities*, determine which ones are application layer incidents.<br>
+                        Then they must determine which ones are exploits.<br><br>
+                        *For example: unsafe deserialization attack, brute-force attack, SQL injection attack, or cross-site scripting (XSS) attack.<br><br>
+                        Contrast ADR will block earlier in the kill chain, therefore that is less incidents that have to be run to ground.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const inputs = [
+            'incidents', 'hourlyRate', 'beforeTime', 'afterTime', 'contrastCost'
+        ];
+
+        function formatCurrency(num) {
+            return `$${num.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        }
+
+        function calculateROI() {
+            const incidents = parseFloat(document.getElementById("incidents").value) || 0;
+            const hourlyRate = parseFloat(document.getElementById("hourlyRate").value) || 0;
+            const beforeTime = parseFloat(document.getElementById("beforeTime").value) || 0;
+            const afterTime = parseFloat(document.getElementById("afterTime").value) || 0;
+            const contrastCost = parseFloat(document.getElementById("contrastCost").value) || 0;
+
+            // Calculations based on annual values
+            const costPerIncidentBefore = (hourlyRate * beforeTime) / 60;
+            const costPerIncidentAfter = (hourlyRate * afterTime) / 60;
+            const annualSavings = (costPerIncidentBefore - costPerIncidentAfter) * incidents;
+            
+            // New calculations for daily and monthly savings
+            const dailyCost = (costPerIncidentBefore * incidents) / 365;
+            const dailySavings = annualSavings / 365;
+            const monthlySavings = annualSavings / 12;
+
+            const netAnnualBenefit = annualSavings - contrastCost;
+
+            // Final ROI and Payback calculations
+            const roi = contrastCost > 0 ? (annualSavings / contrastCost) * 100 : 0;
+            const paybackPeriod = annualSavings > 0 ? contrastCost / annualSavings : 0;
+
+            // Update the UI
+            document.getElementById("beforeCost").textContent = formatCurrency(costPerIncidentBefore * incidents);
+            document.getElementById("afterCost").textContent = formatCurrency(costPerIncidentAfter * incidents);
+            document.getElementById("dailyCost").textContent = formatCurrency(dailyCost);
+            document.getElementById("dailySavings").textContent = formatCurrency(dailySavings);
+            document.getElementById("monthlySavings").textContent = formatCurrency(monthlySavings);
+            document.getElementById("annualSavings").textContent = formatCurrency(annualSavings);
+            document.getElementById("netBenefit").textContent = formatCurrency(netAnnualBenefit);
+            document.getElementById("roi").textContent = `${roi.toFixed(2)}%`;
+            document.getElementById("paybackPeriod").textContent = `${paybackPeriod.toFixed(1)} years`;
+        }
+
+        // Add event listeners to all input fields to trigger calculation on change
+        inputs.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', calculateROI);
+            }
+        });
+
+        // Initial calculation on page load
+        document.addEventListener('DOMContentLoaded', calculateROI);
+    </script>
+</body>
+</html>
