@@ -14,6 +14,68 @@
         .container {
             max-width: 960px;
         }
+        @media print {
+            /* Only hide the print button itself */
+            #print-button {
+                display: none;
+            }
+            /* 🎯 CRITICAL FIX 1: Ensure main container stacks children vertically for printing */
+            main {
+                display: block !important; 
+                grid-template-columns: 1fr !important; /* Disable grid */
+                gap: 0 !important; /* Remove any internal gap spacing */
+            }
+            
+            /* 🎯 Page 1 -> Page 2 Break: Inputs Section */
+            #inputs-section {
+                box-shadow: none !important;
+                background-color: transparent !important;
+                page-break-after: always; /* Force break after Page 1 content */
+                page-break-inside: avoid;
+            }
+            
+            /* Compress the vertical space of result boxes */
+            .result-box {
+                 page-break-inside: avoid;
+                 padding: 0.5rem !important; /* Reduced vertical padding */
+                 margin-bottom: 0.25rem !important; /* Reduced spacing between boxes */
+            }
+            
+            /* Aggressive compression for the final ROI/Payback boxes */
+            .final-kpi-box {
+                margin-top: 0.5rem !important; 
+                page-break-before: avoid !important; 
+            }
+            .final-kpi-box > div {
+                 padding: 0.75rem !important; 
+            }
+
+            /* 🎯 FIX 2: Results section (Page 2) - Ensure it fits and does NOT force a break */
+            .print-page-2-content {
+                page-break-before: auto !important; 
+                page-break-after: auto !important; /* ***CRITICAL FIX***: Let the next element handle the break */
+                page-break-inside: avoid !important; 
+                padding: 1rem !important; 
+            }
+            
+            /* 🎯 FIX 3: Page 3 Start - Force break before Assumptions */
+            #assumptions-notes {
+                page-break-before: always !important; /* ***CRITICAL FIX***: Force page break BEFORE assumptions */
+                box-shadow: none !important; 
+                background-color: transparent !important;
+                padding: 0 !important;
+                margin-top: 0 !important; 
+            }
+            
+            /* Ensure input fields look like static text instead of form elements */
+            input[type="number"] {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                background-color: transparent !important;
+                font-weight: 600; 
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6">
@@ -24,12 +86,11 @@
         </header>
 
         <main class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            <!-- Inputs Section -->
-            <section class="bg-gray-50 p-6 rounded-xl shadow-inner">
+            <section id="inputs-section" class="bg-gray-50 p-6 rounded-xl shadow-inner">
                 <h2 class="text-2xl font-bold text-gray-700 mb-6">Your Current Situation</h2>
                 <div class="space-y-6">
                     <div>
-                        <label for="incidents" class="block text-sm font-medium text-gray-700"># of ANNUAL verified security incidents</label>
+                        <label for="incidents" class="block text-sm font-medium text-gray-700"># of **ANNUAL** verified security incidents</label>
                         <input id="incidents" type="number" value="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
                     </div>
                     <div>
@@ -44,7 +105,6 @@
                         <label for="afterTime" class="block text-sm font-medium text-gray-700">Time to verify each incident with Contrast (minutes)</label>
                         <input id="afterTime" type="number" value="0.5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
                     </div>
-                    <!-- New input for Contrast cost -->
                     <div>
                         <label for="contrastCost" class="block text-sm font-medium text-gray-700">Contrast ADR Annual Cost ($)</label>
                         <input id="contrastCost" type="number" value="40000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out">
@@ -52,44 +112,43 @@
                 </div>
             </section>
 
-            <!-- Results Section -->
-            <section class="bg-indigo-50 p-6 rounded-xl shadow-inner flex flex-col justify-between">
+            <section class="bg-indigo-50 p-6 rounded-xl shadow-inner flex flex-col justify-between print-page-2-content">
+                
                 <div>
                     <h2 class="text-2xl font-bold text-indigo-700 mb-6">Projected Savings & ROI</h2>
                     <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">Annual Cost Without Contrast</h3>
                             <p id="beforeCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">Annual Cost With Contrast</h3>
                             <p id="afterCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
                         </div>
-                        <!-- Daily Cost and Savings -->
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">DAILY cost to verify all application security incidents are exploits</h3>
                             <p id="dailyCost" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">DAILY cost saved</h3>
                             <p id="dailySavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">MONTHLY cost saved</h3>
                             <p id="monthlySavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">Total Annual Savings</h3>
                             <p id="annualSavings" class="text-2xl font-bold text-green-600 mt-1">$0</p>
                         </div>
-                        <div class="bg-white p-4 rounded-lg shadow">
+                        <div class="bg-white p-4 rounded-lg shadow result-box">
                             <h3 class="font-semibold text-gray-800">Net Annual Benefit</h3>
                             <p id="netBenefit" class="text-2xl font-bold text-gray-900 mt-1">$0</p>
                             <p class="text-xs text-gray-500">Savings minus Contrast's annual cost</p>
                         </div>
                     </div>
 
-                    <div class="mt-8 space-y-4">
+                    <div class="mt-8 space-y-4 result-box final-kpi-box">
                         <div class="bg-indigo-600 text-white p-4 rounded-lg shadow-md">
                             <h3 class="text-lg font-bold">Return on Investment (ROI)</h3>
                             <p id="roi" class="text-4xl font-extrabold mt-1">0%</p>
@@ -100,17 +159,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-8 text-sm text-gray-600">
-                    <p class="font-semibold">Assumptions:</p>
-                    <p class="text-xs text-gray-500 mt-2">
-                        SOC team gets alerts using their current tools.<br>
-                        SOC team must go through each alert and for application vulnerabilities*, determine which ones are application layer incidents.<br>
-                        Then they must determine which ones are exploits.<br><br>
-                        *For example: unsafe deserialization attack, brute-force attack, SQL injection attack, or cross-site scripting (XSS) attack.<br><br>
-                        Contrast ADR will block earlier in the kill chain, therefore that is less incidents that have to be run to ground.
-                    </p>
-                </div>
+                
+                <button id="print-button" onclick="window.print()" class="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                    🖨️ Print Results
+                </button>
+                
             </section>
+            
+            <div id="assumptions-notes" class="p-6 rounded-xl">
+                <p class="font-semibold">Assumptions:</p>
+                <p class="text-xs text-gray-500 mt-2">
+                    SOC team gets alerts using their current tools.<br>
+                    SOC team must go through each alert and for application vulnerabilities*, determine which ones are application layer incidents.<br>
+                    Then they must determine which ones are exploits.<br><br>
+                    *For example: unsafe deserialization attack, brute-force attack, SQL injection attack, or cross-site scripting (XSS) attack.<br><br>
+                    Contrast ADR will block earlier in the kill chain, therefore that is less incidents that have to be run to ground.
+                </p>
+            </div>
+
         </main>
     </div>
 
@@ -120,7 +186,8 @@
         ];
 
         function formatCurrency(num) {
-            return `$${num.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+            // Using toLocaleString for currency formatting, ensuring it handles large numbers correctly
+            return `$${Math.round(num).toLocaleString('en-US')}`;
         }
 
         function calculateROI() {
@@ -130,13 +197,16 @@
             const afterTime = parseFloat(document.getElementById("afterTime").value) || 0;
             const contrastCost = parseFloat(document.getElementById("contrastCost").value) || 0;
 
-            // Calculations based on annual values
+            // Calculations based on annual values (time in minutes)
             const costPerIncidentBefore = (hourlyRate * beforeTime) / 60;
             const costPerIncidentAfter = (hourlyRate * afterTime) / 60;
-            const annualSavings = (costPerIncidentBefore - costPerIncidentAfter) * incidents;
+            
+            const annualCostBefore = costPerIncidentBefore * incidents;
+            const annualCostAfter = costPerIncidentAfter * incidents;
+            const annualSavings = annualCostBefore - annualCostAfter;
             
             // New calculations for daily and monthly savings
-            const dailyCost = (costPerIncidentBefore * incidents) / 365;
+            const dailyCost = annualCostBefore / 365;
             const dailySavings = annualSavings / 365;
             const monthlySavings = annualSavings / 12;
 
@@ -147,8 +217,8 @@
             const paybackPeriod = annualSavings > 0 ? contrastCost / annualSavings : 0;
 
             // Update the UI
-            document.getElementById("beforeCost").textContent = formatCurrency(costPerIncidentBefore * incidents);
-            document.getElementById("afterCost").textContent = formatCurrency(costPerIncidentAfter * incidents);
+            document.getElementById("beforeCost").textContent = formatCurrency(annualCostBefore);
+            document.getElementById("afterCost").textContent = formatCurrency(annualCostAfter);
             document.getElementById("dailyCost").textContent = formatCurrency(dailyCost);
             document.getElementById("dailySavings").textContent = formatCurrency(dailySavings);
             document.getElementById("monthlySavings").textContent = formatCurrency(monthlySavings);
