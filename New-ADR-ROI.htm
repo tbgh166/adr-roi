@@ -15,66 +15,104 @@
             max-width: 960px;
         }
         @media print {
+            /* Aggressive Fix 1: Reduce top/bottom margins on the body and main container */
+            body, .container {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important; /* Ensure full width usage */
+                box-shadow: none !important; /* Remove shadows in print */
+            }
+
             /* Only hide the print button itself */
             #print-button {
                 display: none;
             }
-            /* 🎯 CRITICAL FIX 1: Ensure main container stacks children vertically for printing */
+
+            /* 🎯 CRITICAL FIX: Re-enable and configure grid for main to get side-by-side */
             main {
-                display: block !important; 
-                grid-template-columns: 1fr !important; /* Disable grid */
-                gap: 0 !important; /* Remove any internal gap spacing */
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important; /* Two equal columns */
+                gap: 1rem !important; /* Small gap between columns */
+                padding: 0.5rem !important; /* Minimal padding around the grid */
+                box-sizing: border-box !important;
+                width: 100% !important; /* Ensure it takes full width */
+                /* Remove any conflicting flex/float properties from previous attempts */
+                flex-direction: initial !important; 
+                float: none !important;
+                page-break-after: avoid !important; /* Ensure the main content doesn't break itself */
             }
             
-            /* 🎯 Page 1 -> Page 2 Break: Inputs Section */
+            /* Inputs Section - Adjustments for print */
             #inputs-section {
                 box-shadow: none !important;
                 background-color: transparent !important;
-                page-break-after: always; /* Force break after Page 1 content */
-                page-break-inside: avoid;
-            }
-            
-            /* Compress the vertical space of result boxes */
-            .result-box {
-                 page-break-inside: avoid;
-                 padding: 0.5rem !important; /* Reduced vertical padding */
-                 margin-bottom: 0.25rem !important; /* Reduced spacing between boxes */
-            }
-            
-            /* Aggressive compression for the final ROI/Payback boxes */
-            .final-kpi-box {
-                margin-top: 0.5rem !important; 
-                page-break-before: avoid !important; 
-            }
-            .final-kpi-box > div {
-                 padding: 0.75rem !important; 
+                page-break-inside: avoid !important; /* Keep section content together */
+                page-break-before: auto !important; /* No break before this column */
+                page-break-after: auto !important;  /* No break after this column */
+                margin-bottom: 0 !important; /* No extra margin below */
+                padding: 0.5rem !important; /* Reduced padding */
             }
 
-            /* 🎯 FIX 2: Results section (Page 2) - Ensure it fits and does NOT force a break */
+            /* Results Section - Adjustments for print */
             .print-page-2-content {
-                page-break-before: auto !important; 
-                page-break-after: auto !important; /* ***CRITICAL FIX***: Let the next element handle the break */
-                page-break-inside: avoid !important; 
-                padding: 1rem !important; 
+                box-shadow: none !important; /* Remove shadows in print */
+                background-color: transparent !important; /* Make background transparent */
+                page-break-inside: avoid !important; /* Keep section content together */
+                page-break-before: auto !important; /* No break before this column */
+                page-break-after: auto !important;  /* No break after this column */
+                padding: 0.5rem !important; /* Reduced padding */
+                margin-top: 0 !important; /* No extra margin above */
             }
-            
-            /* 🎯 FIX 3: Page 3 Start - Force break before Assumptions */
+
+            /* 🎯 SOLUTION: Completely hide the assumptions section */
             #assumptions-notes {
-                page-break-before: always !important; /* ***CRITICAL FIX***: Force page break BEFORE assumptions */
-                box-shadow: none !important; 
-                background-color: transparent !important;
-                padding: 0 !important;
-                margin-top: 0 !important; 
+                display: none !important; 
             }
-            
+
+            /* Compress result boxes further for vertical space */
+            .result-box {
+                 page-break-inside: avoid !important;
+                 padding: 0.3rem !important; /* Even further reduced vertical padding */
+                 margin-bottom: 0.1rem !important; /* Tighter spacing between boxes */
+                 font-size: 0.8em !important; /* Smaller text in result boxes */
+            }
+            .result-box h3 { font-size: 0.9em !important; }
+            .result-box p { font-size: 1.2em !important; } /* Keep numbers readable */
+
+            /* Aggressive compression for the final ROI/Payback boxes */
+            .final-kpi-box {
+                margin-top: 0.2rem !important; /* Less space above final KPIs */
+                page-break-before: avoid !important;
+            }
+            .final-kpi-box > div {
+                 padding: 0.5rem !important; /* Reduced padding */
+                 font-size: 0.8em !important; /* Smaller text */
+            }
+            .final-kpi-box h3 { font-size: 1em !important; }
+            .final-kpi-box p { font-size: 2em !important; } /* Keep KPI numbers very clear */
+
             /* Ensure input fields look like static text instead of form elements */
             input[type="number"] {
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
                 background-color: transparent !important;
-                font-weight: 600; 
+                font-weight: 600;
+                font-size: 0.9em !important; /* Smaller font for inputs */
+                height: auto !important; /* Allow height to collapse */
             }
+            label { font-size: 0.85em !important; margin-bottom: 0.1rem !important; }
+            .space-y-6 > div { margin-bottom: 0.5rem !important; } /* Reduce space between input groups */
+
+
+            /* Reduce spacing for header elements */
+            header { margin-bottom: 0.5rem !important; }
+            h1 { font-size: 1.8rem !important; margin-bottom: 0.3rem !important; }
+            header p { font-size: 0.75rem !important; margin-top: 0.1rem !important; }
+            .container > header { margin-bottom: 0.5rem !important; }
+
+            /* Reduce heading sizes within sections */
+            section h2 { font-size: 1.2rem !important; margin-bottom: 0.5rem !important; }
         }
     </style>
 </head>
@@ -113,7 +151,6 @@
             </section>
 
             <section class="bg-indigo-50 p-6 rounded-xl shadow-inner flex flex-col justify-between print-page-2-content">
-                
                 <div>
                     <h2 class="text-2xl font-bold text-indigo-700 mb-6">Projected Savings & ROI</h2>
                     <div class="space-y-4">
@@ -159,13 +196,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <button id="print-button" onclick="window.print()" class="mt-8 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
                     🖨️ Print Results
                 </button>
-                
             </section>
-            
+
             <div id="assumptions-notes" class="p-6 rounded-xl">
                 <p class="font-semibold">Assumptions:</p>
                 <p class="text-xs text-gray-500 mt-2">
@@ -176,10 +212,8 @@
                     Contrast ADR will block earlier in the kill chain, therefore that is less incidents that have to be run to ground.
                 </p>
             </div>
-
         </main>
     </div>
-
     <script>
         const inputs = [
             'incidents', 'hourlyRate', 'beforeTime', 'afterTime', 'contrastCost'
@@ -200,11 +234,11 @@
             // Calculations based on annual values (time in minutes)
             const costPerIncidentBefore = (hourlyRate * beforeTime) / 60;
             const costPerIncidentAfter = (hourlyRate * afterTime) / 60;
-            
+
             const annualCostBefore = costPerIncidentBefore * incidents;
             const annualCostAfter = costPerIncidentAfter * incidents;
             const annualSavings = annualCostBefore - annualCostAfter;
-            
+
             // New calculations for daily and monthly savings
             const dailyCost = annualCostBefore / 365;
             const dailySavings = annualSavings / 365;
